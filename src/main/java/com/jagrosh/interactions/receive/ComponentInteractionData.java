@@ -38,4 +38,14 @@ public class ComponentInteractionData
         this.values = null;
         this.components = null; //JsonUtil.optArray(json, "components", j -> new Component(j));
     }
+    
+    public String getCustomId()
+    {
+        return customId;
+    }
+    
+    public Component.Type getType()
+    {
+        return componentType;
+    }
 }

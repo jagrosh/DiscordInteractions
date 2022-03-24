@@ -60,4 +60,9 @@ public class GuildMember implements ISnowflake
     {
         return user;
     }
+    
+    public boolean hasPermission(Permission p)
+    {
+        return (Long.parseLong(this.permissions) & p.getValue()) > 0;
+    }
 }

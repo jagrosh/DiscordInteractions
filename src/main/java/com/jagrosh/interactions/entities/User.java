@@ -59,4 +59,19 @@ public class User implements ISnowflake
     {
         return id;
     }
+
+    public String getUsername()
+    {
+        return username;
+    }
+
+    public String getDiscriminator()
+    {
+        return discriminator;
+    }
+
+    public String getAvatar()
+    {
+        return avatar;
+    }
 }

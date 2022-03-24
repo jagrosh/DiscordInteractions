@@ -17,7 +17,6 @@ package com.jagrosh.interactions;
 
 import com.jagrosh.interactions.command.ApplicationCommand;
 import com.jagrosh.interactions.command.Command;
-import com.jagrosh.interactions.receive.CommandInteractionData;
 import com.jagrosh.interactions.receive.Interaction;
 import com.jagrosh.interactions.requests.RestClient;
 import com.jagrosh.interactions.requests.RestClient.RestResponse;
@@ -38,22 +37,15 @@ public class InteractionsClient
     private final Logger log = LoggerFactory.getLogger(InteractionsClient.class);
     private final RestClient rest;
     private final long appId;
-    private final String botToken;
     private final List<Command> commands;
     private final InteractionsListener listener;
     
-    protected InteractionsClient(long appId, String botToken, List<Command> commands, InteractionsListener listener)
+    protected InteractionsClient(long appId, RestClient rest, List<Command> commands, InteractionsListener listener)
     {
         this.appId = appId;
-        this.botToken = botToken;
+        this.rest = rest;
         this.commands = commands;
         this.listener = listener == null ? new InteractionsListener(){} : listener;
-        this.rest = new RestClient(botToken);
-    }
-    
-    public String getBotToken()
-    {
-        return botToken;
     }
     
     public List<Command> getCommands()
@@ -148,7 +140,7 @@ public class InteractionsClient
     {
         private final List<Command> commands = new ArrayList<>();
         private long appId;
-        private String botToken;
+        private RestClient rest;
         private InteractionsListener listener;
         
         public Builder setAppId(long appId)
@@ -157,9 +149,9 @@ public class InteractionsClient
             return this;
         }
         
-        public Builder setBotToken(String botToken)
+        public Builder setRestClient(RestClient rest)
         {
-            this.botToken = botToken;
+            this.rest = rest;
             return this;
         }
         
@@ -178,7 +170,7 @@ public class InteractionsClient
         
         public InteractionsClient build()
         {
-            return new InteractionsClient(appId, botToken, commands, listener);
+            return new InteractionsClient(appId, rest, commands, listener);
         }
     }
 }

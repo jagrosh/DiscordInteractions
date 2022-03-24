@@ -34,8 +34,8 @@ public class Interaction implements ISnowflake
     private final User user;
     private final String token;
     private final int version;
-    private final Message message;
-    private final String locale, guild_locale;
+    private final ReceivedMessage message;
+    private final WebLocale locale, guildLocale;
     
     public Interaction(JSONObject json)
     {
@@ -66,15 +66,15 @@ public class Interaction implements ISnowflake
             this.cmdData = null;
             this.compData = null;
         }
-        this.guildId = json.optLong("guildId");
-        this.channelId = json.optLong("channelId");
+        this.guildId = json.optLong("guild_id");
+        this.channelId = json.optLong("channel_id");
         this.member = json.has("member") ? new GuildMember(json.getJSONObject("member")) : null;
         this.user = json.has("user") ? new User(json.getJSONObject("user")) : this.member == null ? null : member.getUser();
         this.token = json.getString("token");
         this.version = json.getInt("version");
         this.message = json.has("message") ? new ReceivedMessage(json.getJSONObject("message")) : null;
-        this.locale = json.optString("locale");
-        this.guild_locale = json.optString("guild_locale");
+        this.locale = WebLocale.of(json.optString("locale"));
+        this.guildLocale = WebLocale.of(json.optString("guild_locale"));
     }
 
     @Override
@@ -98,6 +98,11 @@ public class Interaction implements ISnowflake
         return compData;
     }
 
+    public ReceivedMessage getMessage()
+    {
+        return message;
+    }
+
     public long getGuildId()
     {
         return guildId;
@@ -112,10 +117,30 @@ public class Interaction implements ISnowflake
     {
         return member;
     }
+    
+    public User getUser()
+    {
+        return user;
+    }
 
     public String getToken()
     {
         return token;
+    }
+    
+    public WebLocale getUserLocale()
+    {
+        return locale;
+    }
+    
+    public WebLocale getGuildLocale()
+    {
+        return locale;
+    }
+    
+    public WebLocale getEffectiveLocale()
+    {
+        return locale == WebLocale.UNKNOWN ? guildLocale : locale;
     }
     
     public enum Type 

@@ -30,7 +30,6 @@ import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spark.Response;
 import spark.Spark;
 
 /**
@@ -70,16 +69,13 @@ public class Interactions
         {
             res.header("Content-Type", "Application/Json");
             log.info(String.format("Received interaction: %s", req.body()));
+            
             // construct an interaction object
             Interaction interaction = new Interaction(new JSONObject(req.body()));
             String response = client.handle(interaction).toJson().toString();
             
             log.info(String.format("Replying with: %s", response));
             return response;
-        });
-        Spark.get(config.path, (req,res) -> 
-        {
-            return "Hello World";
         });
     }
     

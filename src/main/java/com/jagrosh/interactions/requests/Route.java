@@ -33,7 +33,9 @@ public enum Route
     PATCH_GUILD_COMMAND(Type.PATCH, "applications/%d/guilds/%d/commands/%d"),
     DELETE_GUILD_COMMAND(Type.DELETE, "applications/%d/guilds/%d/commands/%d"),
     
-    
+    // send message
+    POST_MESSAGE(Type.POST, "channels/%d/messages"),
+    PATCH_MESSAGE(Type.PATCH, "channels/%d/messages/%d")
     ;
     
     public static final String BASE_URL = "https://discordapp.com/api/v8/";

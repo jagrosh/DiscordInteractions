@@ -54,4 +54,17 @@ public class CommandInteractionData implements ISnowflake
     {
         return name;
     }
+    
+    public List<CommandInteractionDataOption> getOptions()
+    {
+        return options;
+    }
+    
+    public CommandInteractionDataOption getOptionByName(String name)
+    {
+        for(CommandInteractionDataOption cido: options)
+            if(cido.getName().equalsIgnoreCase(name))
+                return cido;
+        return null;
+    }
 }
