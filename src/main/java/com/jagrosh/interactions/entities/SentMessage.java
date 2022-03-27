@@ -22,6 +22,7 @@ import com.jagrosh.interactions.util.OtherUtil;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -36,8 +37,9 @@ public class SentMessage extends Message implements IJson
     private final List<Component> components;
     private final List<Attachment> attachments;
     private final long referenceMessageId;
+    private final boolean forceComponents, forceEmbeds;
     
-    public SentMessage(boolean tts, String content, List<Embed> embeds, AllowedMentions allowedMentions, int flags, List<Component> components, List<Attachment> attachments, long referenceMessageId)
+    public SentMessage(boolean tts, String content, List<Embed> embeds, AllowedMentions allowedMentions, int flags, List<Component> components, List<Attachment> attachments, long referenceMessageId, boolean forceComponents, boolean forceEmbeds)
     {
         super(content, tts);
         this.embeds = embeds;
@@ -46,6 +48,8 @@ public class SentMessage extends Message implements IJson
         this.components = components;
         this.attachments = attachments;
         this.referenceMessageId = referenceMessageId;
+        this.forceComponents = forceComponents;
+        this.forceEmbeds = forceEmbeds;
     }
     
     @Override
@@ -54,10 +58,10 @@ public class SentMessage extends Message implements IJson
         return new JSONObject()
                 .putOpt("tts", tts)
                 .putOpt("content", content)
-                .putOpt("embeds", JsonUtil.buildArray(embeds))
+                .putOpt("embeds", forceEmbeds && embeds.isEmpty() ? new JSONArray() : JsonUtil.buildArray(embeds))
                 .putOpt("allowed_mentions", allowedMentions == null ? null : allowedMentions.toJson())
                 .putOpt("flags", flags)
-                .putOpt("components", JsonUtil.buildArray(components))
+                .putOpt("components", forceComponents && components.isEmpty() ? new JSONArray() : JsonUtil.buildArray(components))
                 .putOpt("attachments", JsonUtil.buildArray(attachments))
                 .putOpt("message_reference", referenceMessageId == 0L ? null : new JSONObject().put("message_id", referenceMessageId));
     }
@@ -73,6 +77,7 @@ public class SentMessage extends Message implements IJson
         private boolean tts = false;
         private AllowedMentions allowedMentions = new AllowedMentions();
         private long referenceMessageId = 0L;
+        private boolean forceComponents = false, forceEmbeds = false;
         
         public Builder setContent(String content)
         {
@@ -92,9 +97,23 @@ public class SentMessage extends Message implements IJson
             return this;
         }
         
+        public Builder removeEmbeds()
+        {
+            this.forceEmbeds = true;
+            this.embeds.clear();
+            return this;
+        }
+        
         public Builder addComponent(Component component)
         {
             this.components.add(component);
+            return this;
+        }
+        
+        public Builder removeComponents()
+        {
+            this.forceComponents = true;
+            this.components.clear();
             return this;
         }
         
@@ -119,7 +138,7 @@ public class SentMessage extends Message implements IJson
         
         public SentMessage build()
         {
-            return new SentMessage(tts, content, embeds, allowedMentions, OtherUtil.getBitsetValue(flags), components, attachments, referenceMessageId);
+            return new SentMessage(tts, content, embeds, allowedMentions, OtherUtil.getBitsetValue(flags), components, attachments, referenceMessageId, forceComponents, forceEmbeds);
         }
     }
 }

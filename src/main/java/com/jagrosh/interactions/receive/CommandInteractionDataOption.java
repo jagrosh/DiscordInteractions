@@ -108,4 +108,9 @@ public class CommandInteractionDataOption
             return 0L;
         }
     }
+    
+    public boolean isFocused()
+    {
+        return focused;
+    }
 }

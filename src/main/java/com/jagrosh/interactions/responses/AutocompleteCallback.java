@@ -24,11 +24,11 @@ import org.json.JSONObject;
  *
  * @author John Grosh (john.a.grosh@gmail.com)
  */
-public class AutocompleteCallback implements InteractionResponse
+public class AutocompleteCallback<T> implements InteractionResponse
 {
-    private final List<Choice<?>> choices;
+    private final List<Choice<T>> choices;
     
-    public AutocompleteCallback(List<Choice<?>> choices)
+    public AutocompleteCallback(List<Choice<T>> choices)
     {
         this.choices = choices;
     }

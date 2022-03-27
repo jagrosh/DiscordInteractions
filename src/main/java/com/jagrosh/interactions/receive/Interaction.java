@@ -46,6 +46,7 @@ public class Interaction implements ISnowflake
             switch(this.type)
             {
                 case APPLICATION_COMMAND:
+                case APPLICATION_COMMAND_AUTOCOMPLETE:
                     this.cmdData = new CommandInteractionData(json.getJSONObject("data"));
                     this.compData = null;
                     break;
@@ -54,7 +55,6 @@ public class Interaction implements ISnowflake
                     this.cmdData = null;
                     this.compData = new ComponentInteractionData(json.getJSONObject("data"));
                     break;
-                case APPLICATION_COMMAND_AUTOCOMPLETE:
                 case PING:
                 case UNKNOWN:
                 default:
