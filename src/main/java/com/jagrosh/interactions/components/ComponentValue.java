@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jagrosh.interactions.receive;
+package com.jagrosh.interactions.components;
 
-import com.jagrosh.interactions.components.Component;
-import com.jagrosh.interactions.components.ComponentValue;
 import com.jagrosh.interactions.util.JsonUtil;
 import java.util.List;
 import org.json.JSONObject;
@@ -25,19 +23,24 @@ import org.json.JSONObject;
  *
  * @author John Grosh (john.a.grosh@gmail.com)
  */
-public class ComponentInteractionData
+public class ComponentValue extends Component
 {
-    private final String customId;
-    private final Component.Type componentType;
-    private final List<String> values;
     private final List<ComponentValue> components;
+    private final String customId, value;
+    private final Type type;
     
-    public ComponentInteractionData(JSONObject json)
+    public ComponentValue(JSONObject json)
     {
+        this.type = Type.of(json.getInt("type"));
         this.customId = json.optString("custom_id");
-        this.componentType = Component.Type.of(json.optInt("component_type", 0));
-        this.values = null;
+        this.value = json.optString("value");
         this.components = JsonUtil.optArray(json, "components", j -> new ComponentValue(j));
+    }
+    
+    @Override
+    public Type getType()
+    {
+        return this.type;
     }
     
     public String getCustomId()
@@ -45,18 +48,20 @@ public class ComponentInteractionData
         return customId;
     }
     
-    public Component.Type getType()
+    public String getValue()
     {
-        return componentType;
+        return value;
     }
     
-    public List<ComponentValue> getComponents()
+    public List<ComponentValue> getComponentValues()
     {
         return components;
     }
     
-    public String getModalValueByCustomId(String customId)
+    public String getValueByCustomId(String customId)
     {
+        if(customId.equals(this.customId))
+            return value;
         for(ComponentValue cv: components)
         {
             String cvval = cv.getValueByCustomId(customId);

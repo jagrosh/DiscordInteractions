@@ -16,6 +16,7 @@
 package com.jagrosh.interactions.receive;
 
 import com.jagrosh.interactions.command.ApplicationCommandOption;
+import com.jagrosh.interactions.util.JsonUtil;
 import java.util.List;
 import org.json.JSONObject;
 
@@ -59,7 +60,7 @@ public class CommandInteractionDataOption
                 this.doubleValue = null;
                 this.intValue = null;
         }
-        this.options = null;
+        this.options = JsonUtil.optArray(json, "options", CommandInteractionDataOption::new);
         this.focused = json.optBoolean("focused");
     }
     
@@ -71,6 +72,14 @@ public class CommandInteractionDataOption
     public List<CommandInteractionDataOption> getOptions()
     {
         return options;
+    }
+    
+    public CommandInteractionDataOption getOptionByName(String name)
+    {
+        for(CommandInteractionDataOption cido: options)
+            if(cido.getName().equalsIgnoreCase(name))
+                return cido;
+        return null;
     }
     
     public String getStringValue()
@@ -86,5 +95,17 @@ public class CommandInteractionDataOption
     public int getIntValue()
     {
         return this.intValue;
+    }
+    
+    public long getIdValue()
+    {
+        try
+        {
+            return Long.parseLong(this.stringValue);
+        }
+        catch (NumberFormatException | NullPointerException ex)
+        {
+            return 0L;
+        }
     }
 }

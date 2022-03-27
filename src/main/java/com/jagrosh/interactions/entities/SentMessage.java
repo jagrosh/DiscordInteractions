@@ -35,8 +35,9 @@ public class SentMessage extends Message implements IJson
     private final int flags;
     private final List<Component> components;
     private final List<Attachment> attachments;
+    private final long referenceMessageId;
     
-    public SentMessage(boolean tts, String content, List<Embed> embeds, AllowedMentions allowedMentions, int flags, List<Component> components, List<Attachment> attachments)
+    public SentMessage(boolean tts, String content, List<Embed> embeds, AllowedMentions allowedMentions, int flags, List<Component> components, List<Attachment> attachments, long referenceMessageId)
     {
         super(content, tts);
         this.embeds = embeds;
@@ -44,6 +45,7 @@ public class SentMessage extends Message implements IJson
         this.flags = flags;
         this.components = components;
         this.attachments = attachments;
+        this.referenceMessageId = referenceMessageId;
     }
     
     @Override
@@ -56,7 +58,8 @@ public class SentMessage extends Message implements IJson
                 .putOpt("allowed_mentions", allowedMentions == null ? null : allowedMentions.toJson())
                 .putOpt("flags", flags)
                 .putOpt("components", JsonUtil.buildArray(components))
-                .putOpt("attachments", JsonUtil.buildArray(attachments));
+                .putOpt("attachments", JsonUtil.buildArray(attachments))
+                .putOpt("message_reference", referenceMessageId == 0L ? null : new JSONObject().put("message_id", referenceMessageId));
     }
     
     public static class Builder
@@ -69,6 +72,7 @@ public class SentMessage extends Message implements IJson
         private String content = "";
         private boolean tts = false;
         private AllowedMentions allowedMentions = new AllowedMentions();
+        private long referenceMessageId = 0L;
         
         public Builder setContent(String content)
         {
@@ -94,6 +98,12 @@ public class SentMessage extends Message implements IJson
             return this;
         }
         
+        public Builder setReferenceMessage(long messageId)
+        {
+            this.referenceMessageId = messageId;
+            return this;
+        }
+        
         // flags
         public Builder setEphemeral(boolean value)
         {
@@ -109,7 +119,7 @@ public class SentMessage extends Message implements IJson
         
         public SentMessage build()
         {
-            return new SentMessage(tts, content, embeds, allowedMentions, OtherUtil.getBitsetValue(flags), components, attachments);
+            return new SentMessage(tts, content, embeds, allowedMentions, OtherUtil.getBitsetValue(flags), components, attachments, referenceMessageId);
         }
     }
 }

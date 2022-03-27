@@ -65,4 +65,14 @@ public class GuildMember implements ISnowflake
     {
         return (Long.parseLong(this.permissions) & p.getValue()) > 0;
     }
+    
+    public boolean hasRole(long roleId)
+    {
+        return roles.contains(roleId);
+    }
+    
+    public List<Long> getRoles()
+    {
+        return roles;
+    }
 }

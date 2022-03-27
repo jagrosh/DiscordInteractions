@@ -40,4 +40,9 @@ public class OtherUtil
     {
         return choices[(int)(Math.random() * choices.length)];
     }
+    
+    public static String limitLength(String str, int max)
+    {
+        return str == null ? null : str.length() <= max ? str : str.substring(0, max);
+    }
 }

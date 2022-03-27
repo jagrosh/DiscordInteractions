@@ -25,6 +25,7 @@ import com.jagrosh.interactions.responses.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,17 +89,19 @@ public class InteractionsClient
     public void updateGlobalCommands()
     {
         log.info(String.format("Attempting to update %d comamnds", commands.size()));
-        for(Command cmd: commands)
+        JSONArray arr = new JSONArray();
+        commands.forEach(c -> arr.put(c.getApplicationCommand().toJson()));
+        try
         {
-            try
-            {
-                RestResponse res = rest.request(Route.POST_COMMANDS.format(appId), cmd.getApplicationCommand().toJson()).get();
-                log.info(String.format("Command '%s' updated with status '%d'", cmd.getApplicationCommand().getName(), res.getStatus()));
-            }
-            catch(InterruptedException | ExecutionException ex)
-            {
-                ex.printStackTrace();
-            }
+            log.info(String.format("Sending commands: %s", arr));
+            RestResponse res = rest.request(Route.PUT_COMMANDS.format(appId), arr).get();
+            log.info(String.format("Commands updated with status '%d'", res.getStatus()));
+            if(!res.isSuccess())
+                log.error(String.format("Error updating commands: %s", res.getBody()));
+        }
+        catch(InterruptedException | ExecutionException ex)
+        {
+            ex.printStackTrace();
         }
     }
     
@@ -111,6 +114,8 @@ public class InteractionsClient
             {
                 RestResponse res = rest.request(Route.POST_GUILD_COMMANDS.format(appId, guildId), cmd.toJson()).get();
                 log.info(String.format("Command '%s' updated with status '%d'", cmd.getName(), res.getStatus()));
+                if(!res.isSuccess())
+                    log.error(String.format("Error updating command: %s", res.getBody()));
             }
             catch(InterruptedException | ExecutionException ex)
             {
@@ -128,6 +133,27 @@ public class InteractionsClient
             {
                 RestResponse res = rest.request(Route.POST_GUILD_COMMANDS.format(appId, guildId), cmd.getApplicationCommand().toJson()).get();
                 log.info(String.format("Command '%s' updated with status '%d'", cmd.getApplicationCommand().getName(), res.getStatus()));
+                if(!res.isSuccess())
+                    log.error(String.format("Error updating command: %s", res.getBody()));
+            }
+            catch(InterruptedException | ExecutionException ex)
+            {
+                ex.printStackTrace();
+            }
+        }
+    }
+    
+    public void deleteGuildCommands(long guildId, long... cmds)
+    {
+        log.info(String.format("Attempting to delete %d guild commands in %d", cmds.length, guildId));
+        for(long cmd: cmds)
+        {
+            try
+            {
+                RestResponse res = rest.request(Route.DELETE_GUILD_COMMAND.format(appId, guildId, cmd), "").get();
+                log.info(String.format("Deleted command '%d' with status '%d'", cmd, res.getStatus()));
+                if(!res.isSuccess())
+                    log.error(String.format("Error updating command: %s", res.getBody()));
             }
             catch(InterruptedException | ExecutionException ex)
             {

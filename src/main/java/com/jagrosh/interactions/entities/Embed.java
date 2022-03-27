@@ -16,10 +16,14 @@
 package com.jagrosh.interactions.entities;
 
 import com.jagrosh.interactions.interfaces.IJson;
+import com.jagrosh.interactions.util.JsonUtil;
+import com.jagrosh.interactions.util.OtherUtil;
 import java.awt.Color;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONObject;
 
 /**
@@ -32,8 +36,9 @@ public class Embed implements IJson
     private final Instant timestamp;
     private final Color color;
     private final String footerText, footerIconUrl, imageUrl, thumbnailUrl;
+    private final List<Field> fields;
     
-    private Embed(String title, String description, String url, Instant timestamp, Color color, String footerText, String footerIconUrl, String imageUrl, String thumbnailUrl)
+    private Embed(String title, String description, String url, Instant timestamp, Color color, String footerText, String footerIconUrl, String imageUrl, String thumbnailUrl, List<Field> fields)
     {
         this.title = title;
         this.description = description;
@@ -44,20 +49,41 @@ public class Embed implements IJson
         this.footerIconUrl = footerIconUrl;
         this.imageUrl = imageUrl;
         this.thumbnailUrl = thumbnailUrl;
+        this.fields = fields;
     }
     
     @Override
     public JSONObject toJson()
     {
         return new JSONObject()
-                .putOpt("title", title)
-                .putOpt("description", description)
+                .putOpt("title", OtherUtil.limitLength(title, 256))
+                .putOpt("description", OtherUtil.limitLength(description, 4096))
                 .putOpt("url", url)
                 .putOpt("timestamp", timestamp == null ? null : timestamp.atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME))
                 .putOpt("color", color == null ? null : color.getRGB() & 0x00FFFFFF)
-                .putOpt("footer", footerText == null ? null : new JSONObject().put("text", footerText).putOpt("icon_url", footerIconUrl))
+                .putOpt("footer", footerText == null ? null : new JSONObject().put("text", OtherUtil.limitLength(footerText, 2048)).putOpt("icon_url", footerIconUrl))
                 .putOpt("image", imageUrl == null ? null : new JSONObject().put("url", imageUrl))
-                .putOpt("thumbnail", thumbnailUrl == null ? null : new JSONObject().put("url", thumbnailUrl));
+                .putOpt("thumbnail", thumbnailUrl == null ? null : new JSONObject().put("url", thumbnailUrl))
+                .putOpt("fields", JsonUtil.buildArray(fields));
+    }
+    
+    private static class Field implements IJson
+    {
+        private String name, value;
+        private boolean inline;
+        
+        private Field(String name, String value, boolean inline)
+        {
+            this.name = name;
+            this.value = value;
+            this.inline = inline;
+        }
+
+        @Override
+        public JSONObject toJson()
+        {
+            return new JSONObject().put("name", OtherUtil.limitLength(name, 256)).put("value", OtherUtil.limitLength(value, 1024)).put("inline", inline);
+        }
     }
     
     public static class Builder
@@ -66,10 +92,11 @@ public class Embed implements IJson
         private Instant timestamp;
         private Color color;
         private String footerText, footerIconUrl, imageUrl, thumbnailUrl;
+        private final List<Field> fields = new ArrayList<>();
         
         public Embed build()
         {
-            return new Embed(title, description, url, timestamp, color, footerText, footerIconUrl, imageUrl, thumbnailUrl);
+            return new Embed(title, description, url, timestamp, color, footerText, footerIconUrl, imageUrl, thumbnailUrl, fields);
         }
         
         public Builder setTitle(String title, String url)
@@ -113,6 +140,12 @@ public class Embed implements IJson
         public Builder setThumbnail(String url)
         {
             this.thumbnailUrl = url;
+            return this;
+        }
+        
+        public Builder addField(String name, String value, boolean inline)
+        {
+            this.fields.add(new Field(name, value, inline));
             return this;
         }
     }

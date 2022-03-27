@@ -23,6 +23,7 @@ public enum Route
 {
     // global
     GET_COMMANDS(Type.GET, "applications/%d/commands"),
+    PUT_COMMANDS(Type.PUT, "applications/%d/commands"),
     POST_COMMANDS(Type.POST, "applications/%d/commands"),
     PATCH_COMMAND(Type.PATCH, "applications/%d/commands/%d"),
     DELETE_COMMAND(Type.DELETE, "applications/%d/commands/%d"),
@@ -61,7 +62,7 @@ public enum Route
     
     public enum Type
     {
-        GET, POST, PATCH, DELETE
+        GET, POST, PATCH, DELETE, PUT
     }
     
     public static class FormattedRoute
