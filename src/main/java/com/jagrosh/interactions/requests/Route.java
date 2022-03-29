@@ -67,18 +67,23 @@ public enum Route
     
     public static class FormattedRoute
     {
-        private final Route route;
+        private final Route.Type type;
         private final String url;
         
         protected FormattedRoute(Route route, String url)
         {
-            this.route = route;
+            this(route.type, url);
+        }
+        
+        protected FormattedRoute(Route.Type type, String url)
+        {
+            this.type = type;
             this.url = url;
         }
         
-        public Route getRoute()
+        public Route.Type getType()
         {
-            return route;
+            return type;
         }
         
         public String getURL()

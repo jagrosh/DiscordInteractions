@@ -29,6 +29,11 @@ public class PartialEmoji implements IJson, ISnowflake
     private final long id;
     private final boolean animated;
 
+    public PartialEmoji(JSONObject json)
+    {
+        this(json.optString("name"), json.optLong("id"), json.optBoolean("animated"));
+    }
+    
     public PartialEmoji(String name, long id, boolean animated)
     {
         this.name = name;

@@ -33,6 +33,11 @@ public class SelectMenuComponent extends Component
     private final Integer minValues, maxValues;
     private final boolean disabled;
     
+    protected SelectMenuComponent(JSONObject json)
+    {
+        this(json.optString("custom_id"), json.optString("placeholder"), json.optInt("min_values", 1), json.optInt("max_values", 1), json.optBoolean("disabled", false));
+    }
+    
     public SelectMenuComponent(String customId)
     {
         this(customId, null, null, null, false);

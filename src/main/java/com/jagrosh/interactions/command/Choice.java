@@ -16,6 +16,7 @@
 package com.jagrosh.interactions.command;
 
 import com.jagrosh.interactions.interfaces.IJson;
+import com.jagrosh.interactions.util.OtherUtil;
 import org.json.JSONObject;
 
 /**
@@ -38,7 +39,7 @@ public class Choice<T> implements IJson
     public JSONObject toJson()
     {
         return new JSONObject()
-                .put("name", name)
+                .put("name", OtherUtil.limitLength(name, 100))
                 .put("value", value);
     }
     

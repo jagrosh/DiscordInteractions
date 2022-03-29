@@ -74,6 +74,11 @@ public class ApplicationCommand implements ISnowflake, IJson
         return name;
     }
 
+    public Type getType()
+    {
+        return type;
+    }
+    
     @Override
     public JSONObject toJson()
     {

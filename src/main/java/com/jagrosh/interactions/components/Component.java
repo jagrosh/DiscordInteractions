@@ -32,6 +32,34 @@ public abstract class Component implements IJson
         return new JSONObject().put("type", getType().getValue());
     }
     
+    private static class UnknownComponent extends Component
+    {
+        @Override
+        public Type getType()
+        {
+            return Type.UNKNOWN;
+        }
+    }
+    
+    public static Component parseComponent(JSONObject json)
+    {
+        Type type = Type.of(json.getInt("type"));
+        switch(type)
+        {
+            case ACTION_ROW:
+                return new ActionRowComponent(json);
+            case BUTTON:
+                return new ButtonComponent(json);
+            case SELECT_MENU:
+                return new SelectMenuComponent(json);
+            case TEXT_INPUT:
+                return new TextInputComponent(json);
+            case UNKNOWN:
+            default:
+                return new UnknownComponent();
+        }
+    }
+    
     public static enum Type
     {
         UNKNOWN(0), ACTION_ROW(1), BUTTON(2), SELECT_MENU(3), TEXT_INPUT(4);

@@ -63,7 +63,7 @@ public class SentMessage extends Message implements IJson
                 .putOpt("flags", flags)
                 .putOpt("components", forceComponents && components.isEmpty() ? new JSONArray() : JsonUtil.buildArray(components))
                 .putOpt("attachments", JsonUtil.buildArray(attachments))
-                .putOpt("message_reference", referenceMessageId == 0L ? null : new JSONObject().put("message_id", referenceMessageId));
+                .putOpt("message_reference", referenceMessageId == 0L ? null : new JSONObject().put("message_id", Long.toString(referenceMessageId)));
     }
     
     public static class Builder
@@ -133,6 +133,12 @@ public class SentMessage extends Message implements IJson
         public Builder setSuppressEmbeds(boolean value)
         {
             this.flags.set(2, value);
+            return this;
+        }
+        
+        public Builder setAllowedMentions(AllowedMentions am)
+        {
+            this.allowedMentions = am;
             return this;
         }
         

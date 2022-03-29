@@ -16,6 +16,8 @@
 package com.jagrosh.interactions.entities;
 
 import com.jagrosh.interactions.interfaces.IJson;
+import java.util.*;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -24,10 +26,44 @@ import org.json.JSONObject;
  */
 public class AllowedMentions implements IJson
 {
+    private final boolean parseNothing;
+    private final Set<ParseType> parseTypes = new HashSet<>();
+    //private final List<Long> roles = new ArrayList<>();
+    //private final List<Long> users = new ArrayList<>();
+    
+    public AllowedMentions(ParseType... types)
+    {
+        this(false);
+        this.parseTypes.addAll(Arrays.asList(types));
+    }
+    
+    public AllowedMentions()
+    {
+        this(true);
+    }
+    
+    public AllowedMentions(boolean parseNothing)
+    {
+        this.parseNothing = parseNothing;
+    }
+    
     @Override
     public JSONObject toJson()
     {
-        return new JSONObject();
+        JSONObject json = new JSONObject();
+        if(parseNothing)
+            json.put("parse", new JSONArray());
+        else if(!parseTypes.isEmpty())
+        {
+            JSONArray arr = new JSONArray();
+            parseTypes.forEach(p -> arr.put(p.name().toLowerCase()));
+            json.put("parse", arr);
+        }
+        return json;
     }
     
+    public enum ParseType
+    {
+        ROLES, USERS, EVERYONE
+    }
 }

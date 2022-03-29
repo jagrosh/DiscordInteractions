@@ -28,6 +28,13 @@ public class ActionRowComponent extends Component
 {
     private final List<Component> components = new ArrayList<>();
     
+    protected ActionRowComponent(JSONObject json)
+    {
+        List<Component> list = JsonUtil.optArray(json, "components", Component::parseComponent);
+        if(list != null)
+            components.addAll(list);
+    }
+    
     public ActionRowComponent(Component... cs)
     {
         for(Component c: cs)

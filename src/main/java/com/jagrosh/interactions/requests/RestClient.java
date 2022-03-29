@@ -50,15 +50,34 @@ public class RestClient
     
     public CompletableFuture<RestResponse> request(Route.FormattedRoute route, String str)
     {
-        //System.out.println("Route " + route.getURL() + " body " + json.toString());
         return CompletableFuture.supplyAsync(() -> 
         {
             try
             {
                 Response res = client.newCall(new Request.Builder()
                     .url(route.getURL())
-                    .method(route.getRoute().getType().name(), RequestBody.create(str.getBytes()))
+                    .method(route.getType().name(), RequestBody.create(str.getBytes()))
                     .header("Authorization", "Bot " + authorization)
+                    .header("Content-Type", "Application/Json")
+                    .header("User-Agent", "DiscordBot (DiscordInteractions, 0.1)").build()).execute();
+                String body = res.body().string();
+                return new RestResponse(res.code(), body.startsWith("[") ? new JSONObject().put("_", new JSONArray(body)) : new JSONObject(body));
+            }
+            catch(IOException ex)
+            {
+                return new RestResponse(0, null);
+            }
+        });
+    }
+    
+    public CompletableFuture<RestResponse> simpleRequest(String url)
+    {
+        return CompletableFuture.supplyAsync(() -> 
+        {
+            try
+            {
+                Response res = client.newCall(new Request.Builder()
+                    .url(url).get()
                     .header("Content-Type", "Application/Json")
                     .header("User-Agent", "DiscordBot (DiscordInteractions, 0.1)").build()).execute();
                 String body = res.body().string();

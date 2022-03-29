@@ -29,6 +29,11 @@ public class ButtonComponent extends Component
     private final String customId, url;
     private final boolean disabled;
     
+    protected ButtonComponent(JSONObject json)
+    {
+        this(Style.of(json.getInt("style")), json.optString("label"), json.has("emoji") ? new PartialEmoji(json.getJSONObject("emoji")) : null, json.optString("custom_id"), json.optString("url"), json.optBoolean("disabled", false));
+    }
+    
     public ButtonComponent(Style style, String label, String customId)
     {
         this(style, label, null, customId, null, false);
@@ -86,6 +91,14 @@ public class ButtonComponent extends Component
         public int getValue()
         {
             return value;
+        }
+        
+        public static Style of(int value)
+        {
+            for(Style s: values())
+                if(s.value == value)
+                    return s;
+            return UNKNOWN;
         }
     }
 }

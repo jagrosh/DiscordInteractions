@@ -30,6 +30,11 @@ public class TextInputComponent extends Component
     private final boolean required;
     private final String value, placeholder;
     
+    protected TextInputComponent(JSONObject json)
+    {
+        this(json.optString("custom_id"), Style.of(json.getInt("style")), json.optString("label"), json.optInt("min_length"), json.optInt("max_length"), json.optBoolean("required", true), json.optString("value"), json.optString("placeholder"));
+    }
+    
     public TextInputComponent(String customId, Style style, String label, Integer minLength, Integer maxLength, boolean required, String value, String placeholder)
     {
         this.customId = customId;
@@ -55,6 +60,7 @@ public class TextInputComponent extends Component
                 .put("custom_id", customId)
                 .put("style", style.getValue())
                 .put("label", label)
+                .put("required", required)
                 .putOpt("min_length", minLength)
                 .putOpt("max_length", maxLength)
                 .putOpt("value", value)
@@ -75,6 +81,14 @@ public class TextInputComponent extends Component
         public int getValue()
         {
             return value;
+        }
+        
+        public static Style of(int value)
+        {
+            for(Style s: values())
+                if(s.value == value)
+                    return s;
+            return UNKNOWN;
         }
     }
 }
