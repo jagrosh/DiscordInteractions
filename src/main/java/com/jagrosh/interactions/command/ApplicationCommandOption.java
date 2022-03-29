@@ -19,6 +19,7 @@ import com.jagrosh.interactions.entities.ChannelType;
 import com.jagrosh.interactions.interfaces.IJson;
 import com.jagrosh.interactions.util.JsonUtil;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.json.JSONObject;
@@ -104,7 +105,7 @@ public class ApplicationCommandOption implements IJson
     public void setChannelTypes(ChannelType... types)
     {
         this.channelTypes.clear();
-        this.channelTypes.addAll(List.of(types));
+        this.channelTypes.addAll(Arrays.asList(types));
     }
     
     public List<ChannelType> getChannelTypes()
