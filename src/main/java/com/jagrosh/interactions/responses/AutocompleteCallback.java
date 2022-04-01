@@ -17,12 +17,15 @@ package com.jagrosh.interactions.responses;
 
 import com.jagrosh.interactions.command.Choice;
 import com.jagrosh.interactions.util.JsonUtil;
+import java.util.Collections;
 import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
  *
  * @author John Grosh (john.a.grosh@gmail.com)
+ * @param <T> type of choice
  */
 public class AutocompleteCallback<T> implements InteractionResponse
 {
@@ -42,7 +45,16 @@ public class AutocompleteCallback<T> implements InteractionResponse
     @Override
     public JSONObject getData()
     {
+        JSONArray arr = JsonUtil.buildArray(choices);
         return new JSONObject()
-                .put("choices", JsonUtil.buildArray(choices));
+                .put("choices", arr == null ? new JSONArray() : arr);
+    }
+    
+    public static class EmptyAutocompleteCallback extends AutocompleteCallback<Void>
+    {
+        public EmptyAutocompleteCallback()
+        {
+            super(Collections.emptyList());
+        }
     }
 }

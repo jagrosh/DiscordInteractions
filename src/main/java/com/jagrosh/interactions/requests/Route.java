@@ -36,7 +36,10 @@ public enum Route
     
     // send message
     POST_MESSAGE(Type.POST, "channels/%d/messages"),
-    PATCH_MESSAGE(Type.PATCH, "channels/%d/messages/%d")
+    PATCH_MESSAGE(Type.PATCH, "channels/%d/messages/%d"),
+    
+    // get guild
+    GET_GUILD(Type.GET, "guilds/%d")
     ;
     
     public static final String BASE_URL = "https://discordapp.com/api/v8/";

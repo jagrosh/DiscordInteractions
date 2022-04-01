@@ -17,7 +17,6 @@ package com.jagrosh.interactions;
 
 import com.jagrosh.interactions.receive.Interaction;
 import com.jagrosh.interactions.responses.*;
-import java.util.Collections;
 
 /**
  *
@@ -27,7 +26,7 @@ public interface InteractionsListener
 {
     default InteractionResponse onCommand(Interaction interaction)  { return new DeferredCallback(false);  }
     
-    default InteractionResponse onAutocomplete(Interaction interaction)  { return new AutocompleteCallback(Collections.emptyList()); }
+    default InteractionResponse onAutocomplete(Interaction interaction)  { return new AutocompleteCallback.EmptyAutocompleteCallback(); }
     
     default InteractionResponse onMessageComponent(Interaction interaction)  { return new DeferredCallback(true);  }
     

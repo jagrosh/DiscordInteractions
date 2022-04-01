@@ -41,6 +41,17 @@ public class JsonUtil
         return list;
     }
     
+    public static <T> List<T> optStringArray(JSONObject json, String key, Function<String,T> func)
+    {
+        if(!json.has(key))
+            return Collections.emptyList();
+        ArrayList<T> list = new ArrayList<>();
+        JSONArray array = json.getJSONArray(key);
+        for(int i = 0; i < array.length(); i++)
+            list.add(func.apply(array.getString(i)));
+        return list;
+    }
+    
     public static <T> List<T> optIntArray(JSONObject json, String key, Function<Integer,T> func)
     {
         if(!json.has(key))

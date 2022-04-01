@@ -56,7 +56,7 @@ public class RestClient
             {
                 Response res = client.newCall(new Request.Builder()
                     .url(route.getURL())
-                    .method(route.getType().name(), RequestBody.create(str.getBytes()))
+                    .method(route.getType().name(), route.getType() == Route.Type.GET ? null : RequestBody.create(str.getBytes()))
                     .header("Authorization", "Bot " + authorization)
                     .header("Content-Type", "Application/Json")
                     .header("User-Agent", "DiscordBot (DiscordInteractions, 0.1)").build()).execute();

@@ -46,7 +46,7 @@ public class PartialEmoji implements IJson, ISnowflake
     {
         return new JSONObject()
                 .put("name", name)
-                .put("id", id)
+                .put("id", getId())
                 .put("animated", animated);
     }
 
