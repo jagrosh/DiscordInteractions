@@ -40,7 +40,7 @@ public class User implements ISnowflake
         this.id = json.getLong("id");
         this.username = json.getString("username");
         this.discriminator = json.getString("discriminator");
-        this.avatar = json.getString("avatar");
+        this.avatar = json.optString("avatar");
         this.bot = json.optBoolean("bot");
         this.system = json.optBoolean("system");
         this.mfaEnabled = json.optBoolean("mfa_enabled");
