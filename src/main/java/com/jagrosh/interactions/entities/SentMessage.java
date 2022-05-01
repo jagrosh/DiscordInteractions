@@ -144,7 +144,7 @@ public class SentMessage extends Message implements IJson
         
         public SentMessage build()
         {
-            return new SentMessage(tts, content, embeds, allowedMentions, OtherUtil.getBitsetValue(flags), components, attachments, referenceMessageId, forceComponents, forceEmbeds);
+            return new SentMessage(tts, content, embeds, allowedMentions, (int) OtherUtil.getBitsetValue(flags), components, attachments, referenceMessageId, forceComponents, forceEmbeds);
         }
     }
 }

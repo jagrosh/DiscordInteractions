@@ -26,14 +26,14 @@ import java.util.BitSet;
  */
 public class OtherUtil
 {
-    public static int getBitsetValue(BitSet bits)
+    public static long getBitsetValue(BitSet bits)
     {
         if(bits == null)
             return 0;
         long[] arr = bits.toLongArray();
         if(arr.length == 0)
             return 0;
-        return (int) arr[0];
+        return arr[0];
     }
     
     public static String random(String... choices)

@@ -15,6 +15,7 @@
  */
 package com.jagrosh.interactions.command;
 
+import com.jagrosh.interactions.entities.Permission;
 import com.jagrosh.interactions.interfaces.IJson;
 import com.jagrosh.interactions.interfaces.ISnowflake;
 import com.jagrosh.interactions.util.JsonUtil;
@@ -33,16 +34,18 @@ public class ApplicationCommand implements ISnowflake, IJson
     private final long applicationId, guildId;
     private final String name, description;
     private final List<ApplicationCommandOption> options;
-    private final boolean defaultPermission;
+    private final boolean dmPermission;
+    private final String defaultMemberPermissions;
     private final long version;
 
-    public ApplicationCommand(ApplicationCommand.Type type, String name, String description, List<ApplicationCommandOption> options, boolean defaultPermission)
+    public ApplicationCommand(ApplicationCommand.Type type, String name, String description, List<ApplicationCommandOption> options, boolean dmPermission, String defaultMemberPermissions)
     {
         this.type = type;
         this.name = name;
         this.description = description;
         this.options = options;
-        this.defaultPermission = defaultPermission;
+        this.dmPermission = dmPermission;
+        this.defaultMemberPermissions = defaultMemberPermissions;
         
         this.id = 0L;
         this.applicationId = 0L;
@@ -59,7 +62,8 @@ public class ApplicationCommand implements ISnowflake, IJson
         this.name = json.getString("name");
         this.description = json.getString("description");
         this.options = JsonUtil.optArray(json, "options", ApplicationCommandOption::new);
-        this.defaultPermission = json.optBoolean("default_permission", true);
+        this.dmPermission = json.optBoolean("dm_permission", true);
+        this.defaultMemberPermissions = json.optString("default_member_permissions");
         this.version = json.getLong("version");
     }
     
@@ -88,7 +92,8 @@ public class ApplicationCommand implements ISnowflake, IJson
                 .put("name", name)
                 .put("description", description)
                 .putOpt("options", options.isEmpty() ? null : JsonUtil.buildArray(options))
-                .putOpt("default_permission", defaultPermission);
+                .put("dm_permission", dmPermission)
+                .putOpt("default_member_permissions", defaultMemberPermissions);
     }
     
     public enum Type
@@ -122,7 +127,8 @@ public class ApplicationCommand implements ISnowflake, IJson
         
         private ApplicationCommand.Type type;
         private String name = "", description = "";
-        private boolean defaultPermission = true;
+        private boolean dmPermission = true;
+        private String defaultPermissions = null;
         
         public Builder setType(ApplicationCommand.Type type)
         {
@@ -142,9 +148,18 @@ public class ApplicationCommand implements ISnowflake, IJson
             return this;
         }
         
-        public Builder setDefaultPermission(boolean defaultPermission)
+        public Builder setDmPermission(boolean dmPermission)
         {
-            this.defaultPermission = defaultPermission;
+            this.dmPermission = dmPermission;
+            return this;
+        }
+        
+        public Builder setDefaultPermissions(Permission... permissions)
+        {
+            long val = 0L;
+            for(Permission p: permissions)
+                val += p.getValue();
+            this.defaultPermissions = Long.toString(val);
             return this;
         }
         
@@ -157,7 +172,7 @@ public class ApplicationCommand implements ISnowflake, IJson
         
         public ApplicationCommand build()
         {
-            return new ApplicationCommand(type, name, description, options, defaultPermission);
+            return new ApplicationCommand(type, name, description, options, dmPermission, defaultPermissions);
         }
     }
 }
