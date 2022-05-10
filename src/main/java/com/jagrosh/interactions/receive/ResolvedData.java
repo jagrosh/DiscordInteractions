@@ -15,6 +15,9 @@
  */
 package com.jagrosh.interactions.receive;
 
+import com.jagrosh.interactions.entities.*;
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONObject;
 
 /**
@@ -23,8 +26,53 @@ import org.json.JSONObject;
  */
 public class ResolvedData
 {
+    private final Map<Long,User> users = new HashMap<>();
+    private final Map<Long,GuildMember> members = new HashMap<>();
+    private final Map<Long,GuildRole> roles = new HashMap<>();
+    private final Map<Long,ReceivedMessage> messages = new HashMap<>();
+    private final Map<Long,Attachment> attachments = new HashMap<>();
+    
     public ResolvedData(JSONObject json)
     {
-        
+        JSONObject u = json.optJSONObject("users");
+        if(u != null)
+            u.keySet().forEach(k -> users.put(Long.parseLong(k), new User(u.getJSONObject(k))));
+        JSONObject m = json.optJSONObject("members");
+        if(m != null)
+            m.keySet().forEach(k -> members.put(Long.parseLong(k), new GuildMember(m.getJSONObject(k))));
+        JSONObject r = json.optJSONObject("roles");
+        if(r != null)
+            r.keySet().forEach(k -> roles.put(Long.parseLong(k), new GuildRole(r.getJSONObject(k))));
+        JSONObject s = json.optJSONObject("messages");
+        if(s != null)
+            s.keySet().forEach(k -> messages.put(Long.parseLong(k), new ReceivedMessage(s.getJSONObject(k))));
+        //JSONObject a = json.optJSONObject("attachments");
+        //if(a != null)
+        //    a.keySet().forEach(k -> attachments.put(Long.parseLong(k), new Attachment()));
+    }
+    
+    public Map<Long,User> getUsers()
+    {
+        return users;
+    }
+
+    public Map<Long, GuildMember> getMembers()
+    {
+        return members;
+    }
+
+    public Map<Long, GuildRole> getRoles()
+    {
+        return roles;
+    }
+
+    public Map<Long, ReceivedMessage> getMessages()
+    {
+        return messages;
+    }
+
+    public Map<Long, Attachment> getAttachments()
+    {
+        return attachments;
     }
 }

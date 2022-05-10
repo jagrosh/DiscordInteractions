@@ -67,4 +67,9 @@ public class CommandInteractionData implements ISnowflake
                 return cido;
         return null;
     }
+    
+    public ResolvedData getResolvedData()
+    {
+        return resolved;
+    }
 }
