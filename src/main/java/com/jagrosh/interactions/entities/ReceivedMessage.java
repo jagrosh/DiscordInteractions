@@ -104,4 +104,9 @@ public class ReceivedMessage extends Message implements ISnowflake
     {
         return timestamp;
     }
+    
+    public List<Component> getComponents()
+    {
+        return components;
+    }
 }
