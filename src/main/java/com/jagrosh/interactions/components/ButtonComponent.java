@@ -58,6 +58,36 @@ public class ButtonComponent extends Component
         this.url = url;
         this.disabled = disabled;
     }
+    
+    public Style getStyle()
+    {
+        return style;
+    }
+    
+    public String getLabel()
+    {
+        return label;
+    }
+    
+    public PartialEmoji getEmoji()
+    {
+        return emoji;
+    }
+    
+    public String getCustomId()
+    {
+        return customId;
+    }
+    
+    public String getUrl()
+    {
+        return url;
+    }
+    
+    public boolean isDisabled()
+    {
+        return disabled;
+    }
 
     @Override
     public Type getType()

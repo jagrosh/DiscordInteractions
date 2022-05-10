@@ -47,6 +47,11 @@ public class ActionRowComponent extends Component
             components.add(c);
     }
     
+    public List<Component> getComponents()
+    {
+        return components;
+    }
+    
     @Override
     public Component.Type getType()
     {
