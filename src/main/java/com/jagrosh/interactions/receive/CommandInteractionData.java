@@ -68,6 +68,16 @@ public class CommandInteractionData implements ISnowflake
         return null;
     }
     
+    public long getTargetId()
+    {
+        return targetId;
+    }
+    
+    public ApplicationCommand.Type getType()
+    {
+        return type;
+    }
+    
     public ResolvedData getResolvedData()
     {
         return resolved;
