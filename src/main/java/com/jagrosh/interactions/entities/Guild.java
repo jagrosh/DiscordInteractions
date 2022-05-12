@@ -17,7 +17,6 @@ package com.jagrosh.interactions.entities;
 
 import com.jagrosh.interactions.interfaces.ISnowflake;
 import com.jagrosh.interactions.util.JsonUtil;
-import java.util.EnumSet;
 import java.util.List;
 import org.json.JSONObject;
 
@@ -44,6 +43,7 @@ public class Guild implements ISnowflake
     private final long systemChannelId;
     private final int systemChannelFlags;
     private final long rulesChannelId;
+    private final WebLocale preferredLocale;
     // todo: the rest
 
     public Guild(JSONObject json)
@@ -68,6 +68,7 @@ public class Guild implements ISnowflake
         this.systemChannelId = json.optLong("system_channel_id");
         this.systemChannelFlags = json.optInt("system_channel_flags");
         this.rulesChannelId = json.optLong("rules_channel_id");
+        this.preferredLocale = WebLocale.of(json.optString("preferred_locale"));
     }
     
     @Override
@@ -85,6 +86,17 @@ public class Guild implements ISnowflake
     {
         return roles;
     }
+    
+    public String getName()
+    {
+        return name;
+    }
+
+    public WebLocale getPreferredLocale()
+    {
+        return preferredLocale;
+    }
+    
     
     public enum VerificationLevel
     {
