@@ -48,6 +48,11 @@ public class RestClient
         return request(route, json.toString());
     }
     
+    public CompletableFuture<RestResponse> request(Route.FormattedRoute route)
+    {
+        return request(route, "");
+    }
+    
     public CompletableFuture<RestResponse> request(Route.FormattedRoute route, String str)
     {
         return CompletableFuture.supplyAsync(() -> 
@@ -56,7 +61,7 @@ public class RestClient
             {
                 Response res = client.newCall(new Request.Builder()
                     .url(route.getURL())
-                    .method(route.getType().name(), route.getType() == Route.Type.GET ? null : RequestBody.create(str.getBytes()))
+                    .method(route.getType().name(), route.getType() == Route.Type.GET || str == null || str.isBlank() ? null : RequestBody.create(str.getBytes()))
                     .header("Authorization", "Bot " + authorization)
                     .header("Content-Type", "Application/Json")
                     .header("User-Agent", "DiscordBot (DiscordInteractions, 0.1)").build()).execute();

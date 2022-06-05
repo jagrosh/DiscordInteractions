@@ -19,7 +19,6 @@ import com.jagrosh.interactions.command.Command;
 import com.jagrosh.interactions.command.ApplicationCommand;
 import com.jagrosh.interactions.receive.Interaction;
 import com.jagrosh.interactions.responses.InteractionResponse;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**

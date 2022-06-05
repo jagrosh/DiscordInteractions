@@ -37,9 +37,12 @@ public enum Route
     // send message
     POST_MESSAGE(Type.POST, "channels/%d/messages"),
     PATCH_MESSAGE(Type.PATCH, "channels/%d/messages/%d"),
+    DELETE_MESSAGE(Type.DELETE, "channels/%d/messages/%d"),
     
     // get guild
-    GET_GUILD(Type.GET, "guilds/%d")
+    GET_GUILD(Type.GET, "guilds/%d"),
+    ADD_GUILD_MEMBER_ROLE(Type.PUT, "/guilds/%d/members/%d/roles/%d"),
+    REMOVE_GUILD_MEMBER_ROLE(Type.DELETE, "/guilds/%d/members/%d/roles/%d"),
     ;
     
     public static final String BASE_URL = "https://discordapp.com/api/v8/";

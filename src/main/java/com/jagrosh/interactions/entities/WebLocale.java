@@ -21,49 +21,60 @@ package com.jagrosh.interactions.entities;
  */
 public enum WebLocale
 {
-    UNKNOWN("", "Unknown Locale"),
-    ENGLISH_US("en-US", "English (United States)"),
-    ENGLISH_UK("en-GB", "English (Great Britain)"),
-    BULGARIAN("bg", "Bulgarian"),
-    CHINESE_CHINA("zh-CN", "Chinese (China)"),
-    CHINESE_TAIWAN("zh-TW", "Chinese (Taiwan)"),
-    CROATION("hr", "Croatian"),
-    CZECH("cs", "Czech"),
-    DANISH("da", "Danish"),
-    DUTCH("nl", "Dutch"),
-    FINNISH("fi", "Finnish"),
-    FRENCH("fr", "French"),
-    GERMAN("de", "German"),
-    GREEK("el", "Greek"),
-    HINDI("hi", "Hindi"),
-    HUNGARIAN("hu", "Hungarian"),
-    ITALIAN("it", "Italian"),
-    JAPANESE("ja", "Japanese"),
-    KOREAN("ko", "Korean"),
-    LITHUANIAN("lt", "Lithuanian"),
-    NORWEGIAN("no", "Norwegian"),
-    POLISH("pl", "Polish"),
-    PORTUGUESE("pt-BR", "Portuguese (Brazil)"),
-    ROMANIAN("ro", "Romanian"),
-    RUSSIAN("ru", "Russian"),
-    SPANISH("es-ES", "Spanish (Spain)"),
-    SWEDISH("sv-SE", "Swedish"),
-    THAI("th", "Thai"),
-    TURKISH("tr", "Turkish"),
-    UKRAINIAN("uk", "Ukrainian"),
-    VIETNAMESE("vi", "Vietnamese");
+    UNKNOWN(       "",      "Unknown Locale"),
+    ENGLISH_US(    "en-US", "English (United States)"),
+    ENGLISH_UK(    "en-GB", "English (Great Britain)"),
+    BULGARIAN(     "bg",    "Bulgarian",                "български"),
+    CHINESE_CHINA( "zh-CN", "Chinese (China)",          "中文"),
+    CHINESE_TAIWAN("zh-TW", "Chinese (Taiwan)",         "繁體中文"),
+    CROATION(      "hr",    "Croatian",                 "Hrvatski"),
+    CZECH(         "cs",    "Czech",                    "Čeština"),
+    DANISH(        "da",    "Danish",                   "Dansk"),
+    DUTCH(         "nl",    "Dutch",                    "Nederlands"),
+    FINNISH(       "fi",    "Finnish",                  "Suomi"),
+    FRENCH(        "fr",    "French",                   "Français"),
+    GERMAN(        "de",    "German",                   "Deutsch"),
+    GREEK(         "el",    "Greek",                    "Ελληνικά"),
+    HINDI(         "hi",    "Hindi",                    "हिन्दी"),
+    HUNGARIAN(     "hu",    "Hungarian",                "Magyar"),
+    ITALIAN(       "it",    "Italian",                  "Italiano"),
+    JAPANESE(      "ja",    "Japanese",                 "日本語"),
+    KOREAN(        "ko",    "Korean",                   "한국어"),
+    LITHUANIAN(    "lt",    "Lithuanian",               "Lietuviškai"),
+    NORWEGIAN(     "no",    "Norwegian",                "Norsk"),
+    POLISH(        "pl",    "Polish",                   "Polski"),
+    PORTUGUESE(    "pt-BR", "Portuguese (Brazil)",      "Português do Brasil"),
+    ROMANIAN(      "ro",    "Romanian",                 "Română"),
+    RUSSIAN(       "ru",    "Russian",                  "Pусский"),
+    SPANISH(       "es-ES", "Spanish (Spain)",          "Español"),
+    SWEDISH(       "sv-SE", "Swedish",                  "Svenska"),
+    THAI(          "th",    "Thai",                     "ไทย"),
+    TURKISH(       "tr",    "Turkish",                  "Türkçe"),
+    UKRAINIAN(     "uk",    "Ukrainian",                "Українська"),
+    VIETNAMESE(    "vi",    "Vietnamese",               "Tiếng Việt");
 
-    private final String code, text;
+    private final String code, text, nativ;
 
     private WebLocale(String code, String text)
     {
+        this(code, text, text);
+    }
+    
+    private WebLocale(String code, String text, String nativ)
+    {
         this.code = code;
         this.text = text;
+        this.nativ = nativ;
     }
 
     public String getTextualName()
     {
         return text;
+    }
+    
+    public String getNativeName()
+    {
+        return nativ;
     }
     
     public String getCode()
