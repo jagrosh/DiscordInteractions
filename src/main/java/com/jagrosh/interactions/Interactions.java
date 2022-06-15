@@ -61,21 +61,28 @@ public class Interactions
             catch (SignatureException | NullPointerException ex) {}
             if(!verified)
             {
-                log.info(String.format("Unverified request from %s (%s)", req.host(), req.headers("x-signature-ed25519")));
+                log.warn(String.format("Unverified request from %s (%s)", req.host(), req.headers("x-signature-ed25519")));
                 Spark.halt(401);
             }
         });
         Spark.post(config.path, (req, res) -> 
         {
-            res.header("Content-Type", "Application/Json");
-            log.info(String.format("Received interaction: %s", req.body()));
-            
-            // construct an interaction object
-            Interaction interaction = new Interaction(new JSONObject(req.body()));
-            String response = client.handle(interaction).toJson().toString();
-            
-            log.info(String.format("Replying with: %s", response));
-            return response;
+            log.debug(String.format("Received interaction: %s", req.body()));
+            try
+            {
+                // construct an interaction object
+                Interaction interaction = new Interaction(new JSONObject(req.body()));
+                String response = client.handle(interaction).toJson().toString();
+                log.debug(String.format("Replying with: %s", response));
+                res.header("Content-Type", "Application/Json");
+                return response;
+            }
+            catch(Exception ex)
+            {
+                ex.printStackTrace();
+                Spark.halt(500);
+                return null;
+            }
         });
     }
     
