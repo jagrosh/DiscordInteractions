@@ -15,12 +15,10 @@
  */
 package com.jagrosh.interactions.requests;
 
+import com.jagrosh.interactions.requests.Route;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import okhttp3.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -65,8 +63,7 @@ public class RestClient
                     .header("Authorization", "Bot " + authorization)
                     .header("Content-Type", "Application/Json")
                     .header("User-Agent", "DiscordBot (DiscordInteractions, 0.1)").build()).execute();
-                String body = res.body().string();
-                return new RestResponse(res.code(), body.startsWith("[") ? new JSONObject().put("_", new JSONArray(body)) : new JSONObject(body));
+                return new RestResponse(res.code(), bodyToJson(res.body()));
             }
             catch(IOException ex)
             {
@@ -85,14 +82,21 @@ public class RestClient
                     .url(url).get()
                     .header("Content-Type", "Application/Json")
                     .header("User-Agent", "DiscordBot (DiscordInteractions, 0.1)").build()).execute();
-                String body = res.body().string();
-                return new RestResponse(res.code(), body.startsWith("[") ? new JSONObject().put("_", new JSONArray(body)) : new JSONObject(body));
+                return new RestResponse(res.code(), bodyToJson(res.body()));
             }
             catch(IOException ex)
             {
                 return new RestResponse(0, null);
             }
         });
+    }
+    
+    private static JSONObject bodyToJson(ResponseBody body) throws IOException
+    {
+        if(body == null)
+            return new JSONObject();
+        String str = body.string();
+        return str.startsWith("[") ? new JSONObject().put("_", new JSONArray(str)) : new JSONObject(str);
     }
     
     public class RestResponse
