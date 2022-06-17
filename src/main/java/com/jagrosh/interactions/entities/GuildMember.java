@@ -43,9 +43,9 @@ public class GuildMember implements ISnowflake
         this.roles = JsonUtil.longArray(json.getJSONArray("roles"));
         this.joinedAt = OffsetDateTime.parse(json.getString("joined_at"));
         this.premiumSince = json.isNull("premium_since") ? null : OffsetDateTime.parse(json.getString("premium_since"));
-        this.deaf = json.getBoolean("deaf");
-        this.mute = json.getBoolean("mute");
-        this.pending = json.optBoolean("pending");
+        this.deaf = json.optBoolean("deaf", false);
+        this.mute = json.optBoolean("mute", false);
+        this.pending = json.optBoolean("pending", false);
         this.permissions = json.optString("permissions");
         this.communicationDisabledUntil = json.isNull("communication_disabled_until") ? null : OffsetDateTime.parse(json.getString("communication_disabled_until"));
     }

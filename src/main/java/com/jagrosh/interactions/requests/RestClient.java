@@ -139,7 +139,7 @@ public class RestClient
         {
             if(isSuccess())
                 return 0;
-            return body.has("code") ? body.getInt("code") : 0;
+            return body != null && body.has("code") ? body.getInt("code") : 0;
         }
     }
     
