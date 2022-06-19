@@ -46,6 +46,7 @@ public class Interactions
         EdDSAEngine sgr = new EdDSAEngine(MessageDigest.getInstance(spec.getHashAlgorithm()));
         sgr.initVerify(new EdDSAPublicKey(pubKey));
         
+        Spark.threadPool(config.maxThreads);
         Spark.port(config.port);
         if(config.keystore != null && config.keystorePass != null)
             Spark.secure(config.keystore, config.keystorePass, null, null);
@@ -89,6 +90,6 @@ public class Interactions
     public static class InteractionsConfig
     {
         public String publicKey, path = "/", keystore = null, keystorePass = null;
-        public int port;
+        public int port = 8443, maxThreads = 1;
     }
 }
