@@ -16,6 +16,9 @@
 package com.jagrosh.interactions;
 
 import com.jagrosh.interactions.receive.Interaction;
+import io.javalin.Javalin;
+import io.javalin.http.Context;
+import io.javalin.http.Handler;
 import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
@@ -27,10 +30,13 @@ import net.i2p.crypto.eddsa.Utils;
 import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
 import net.i2p.crypto.eddsa.spec.EdDSAParameterSpec;
 import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spark.Spark;
 
 /**
  *
@@ -46,50 +52,61 @@ public class Interactions
         EdDSAEngine sgr = new EdDSAEngine(MessageDigest.getInstance(spec.getHashAlgorithm()));
         sgr.initVerify(new EdDSAPublicKey(pubKey));
         
-        Spark.threadPool(config.maxThreads);
-        Spark.port(config.port);
-        if(config.keystore != null && config.keystorePass != null)
-            Spark.secure(config.keystore, config.keystorePass, null, null);
-        Spark.before(config.path, (req,res) -> 
+        Javalin.create(conf -> 
         {
-            // verify that discord is sending the request
-            sgr.update((req.headers("x-signature-timestamp") + req.body()).getBytes(Charset.forName("UTF-8")));
-            boolean verified = false;
-            try
+            // configure https
+            if(config.keystore != null && config.keystorePass != null)
             {
-                verified = sgr.verify(Utils.hexToBytes(req.headers("x-signature-ed25519")));
+                conf.server(() -> 
+                {
+                    Server server = new Server();
+                    SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
+                    sslContextFactory.setKeyStorePath(config.keystore);
+                    sslContextFactory.setKeyStorePassword(config.keystorePass);
+                    ServerConnector sslConnector = new ServerConnector(server, sslContextFactory);
+                    sslConnector.setPort(config.port);
+                    server.setConnectors(new Connector[]{sslConnector});
+                    return server;
+                });
             }
-            catch (SignatureException | NullPointerException ex) {}
-            if(!verified)
+            
+            // configure access manager
+            conf.accessManager((handler, ctx, routeRoles) -> 
             {
-                log.warn(String.format("Unverified request from %s (%s)", req.host(), req.headers("x-signature-ed25519")));
-                Spark.halt(401);
-            }
-        });
-        Spark.post(config.path, (req, res) -> 
+                // verify that discord is sending the request
+                sgr.update((ctx.header("x-signature-timestamp") + ctx.body()).getBytes(Charset.forName("UTF-8")));
+                boolean verified = false;
+                try
+                {
+                    verified = sgr.verify(Utils.hexToBytes(ctx.header("x-signature-ed25519")));
+                }
+                catch (SignatureException | NullPointerException ex) {}
+                if(verified)
+                {
+                    handler.handle(ctx);
+                }
+                else
+                {
+                    log.warn(String.format("Unverified request from %s (%s | %s)", ctx.host(), ctx.matchedPath(), ctx.header("x-signature-ed25519")));
+                    ctx.status(401);
+                }
+            });
+        }).post(config.path, ctx ->
         {
-            log.debug(String.format("Received interaction: %s", req.body()));
-            try
-            {
-                // construct an interaction object
-                Interaction interaction = new Interaction(new JSONObject(req.body()));
-                String response = client.handle(interaction).toJson().toString();
-                log.debug(String.format("Replying with: %s", response));
-                res.header("Content-Type", "Application/Json");
-                return response;
-            }
-            catch(Exception ex)
-            {
-                ex.printStackTrace();
-                Spark.halt(500);
-                return null;
-            }
-        });
+            log.debug(String.format("Received interaction: %s", ctx.body()));
+
+            // construct an interaction object
+            Interaction interaction = new Interaction(new JSONObject(ctx.body()));
+            String response = client.handle(interaction).toJson().toString();
+
+            log.debug(String.format("Replying with: %s", response));
+            ctx.header("Content-Type", "Application/Json").result(response);
+        }).exception(Exception.class, (ex, ctx) -> ex.printStackTrace()).start();
     }
     
     public static class InteractionsConfig
     {
         public String publicKey, path = "/", keystore = null, keystorePass = null;
-        public int port = 8443, maxThreads = 1;
+        public int port = 8443;
     }
 }

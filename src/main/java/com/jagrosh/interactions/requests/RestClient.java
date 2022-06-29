@@ -67,6 +67,7 @@ public class RestClient
             }
             catch(IOException ex)
             {
+                ex.printStackTrace();
                 return new RestResponse(0, null);
             }
         });
@@ -96,6 +97,8 @@ public class RestClient
         if(body == null)
             return new JSONObject();
         String str = body.string();
+        if(str.isEmpty())
+            return new JSONObject();
         return str.startsWith("[") ? new JSONObject().put("_", new JSONArray(str)) : new JSONObject(str);
     }
     
