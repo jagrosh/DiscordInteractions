@@ -15,6 +15,7 @@
  */
 package com.jagrosh.interactions.receive;
 
+import com.jagrosh.interactions.InteractionsClient;
 import com.jagrosh.interactions.entities.*;
 import com.jagrosh.interactions.interfaces.ISnowflake;
 import org.json.JSONObject;
@@ -25,6 +26,7 @@ import org.json.JSONObject;
  */
 public class Interaction implements ISnowflake
 {
+    private final InteractionsClient client;
     private final long id, applicationId;
     private final Interaction.Type type;
     private final CommandInteractionData cmdData;
@@ -36,9 +38,12 @@ public class Interaction implements ISnowflake
     private final int version;
     private final ReceivedMessage message;
     private final WebLocale locale, guildLocale;
+    private final long appPermissions;
     
-    public Interaction(JSONObject json)
+    
+    public Interaction(JSONObject json, InteractionsClient client)
     {
+        this.client = client;
         this.id = json.getLong("id");
         this.applicationId = json.getLong("application_id");
         this.type = Interaction.Type.of(json.getInt("type"));
@@ -75,6 +80,12 @@ public class Interaction implements ISnowflake
         this.message = json.has("message") ? new ReceivedMessage(json.getJSONObject("message")) : null;
         this.locale = WebLocale.of(json.optString("locale"));
         this.guildLocale = WebLocale.of(json.optString("guild_locale"));
+        this.appPermissions = json.optLong("app_permissions");
+    }
+    
+    public InteractionsClient getClient()
+    {
+        return client;
     }
 
     @Override
@@ -141,6 +152,11 @@ public class Interaction implements ISnowflake
     public WebLocale getEffectiveLocale()
     {
         return locale == WebLocale.UNKNOWN ? guildLocale : locale;
+    }
+    
+    public boolean appHasPermission(Permission p)
+    {
+        return (this.appPermissions & p.getValue()) > 0;
     }
     
     public enum Type 

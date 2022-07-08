@@ -32,7 +32,7 @@ public class GuildMember implements ISnowflake
     private final List<Long> roles;
     private final OffsetDateTime joinedAt, premiumSince;
     private final boolean deaf, mute, pending;
-    private final String permissions;
+    private final long permissions;
     private final OffsetDateTime communicationDisabledUntil;
     
     public GuildMember(JSONObject json)
@@ -46,7 +46,7 @@ public class GuildMember implements ISnowflake
         this.deaf = json.optBoolean("deaf", false);
         this.mute = json.optBoolean("mute", false);
         this.pending = json.optBoolean("pending", false);
-        this.permissions = json.optString("permissions");
+        this.permissions = json.optLong("permissions", 0L);
         this.communicationDisabledUntil = json.isNull("communication_disabled_until") ? null : OffsetDateTime.parse(json.getString("communication_disabled_until"));
     }
 
@@ -63,7 +63,7 @@ public class GuildMember implements ISnowflake
     
     public boolean hasPermission(Permission p)
     {
-        return (Long.parseLong(this.permissions) & p.getValue()) > 0;
+        return (this.permissions & p.getValue()) > 0;
     }
     
     public boolean hasRole(long roleId)

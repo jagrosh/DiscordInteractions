@@ -67,7 +67,6 @@ public class RestClient
             }
             catch(IOException ex)
             {
-                ex.printStackTrace();
                 return new RestResponse(0, null);
             }
         });

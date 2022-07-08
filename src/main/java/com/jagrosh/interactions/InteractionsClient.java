@@ -22,10 +22,29 @@ import com.jagrosh.interactions.requests.RestClient;
 import com.jagrosh.interactions.requests.RestClient.RestResponse;
 import com.jagrosh.interactions.requests.Route;
 import com.jagrosh.interactions.responses.*;
-import java.util.ArrayList;
-import java.util.List;
+import io.javalin.Javalin;
+import java.nio.charset.Charset;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
+import net.i2p.crypto.eddsa.EdDSAEngine;
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
+import net.i2p.crypto.eddsa.Utils;
+import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
+import net.i2p.crypto.eddsa.spec.EdDSAParameterSpec;
+import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
+import org.eclipse.jetty.io.EofException;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.StatisticsHandler;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,25 +55,132 @@ import org.slf4j.LoggerFactory;
 public class InteractionsClient
 {
     private final Logger log = LoggerFactory.getLogger(InteractionsClient.class);
+    private final Map<String,Long> metrics = new HashMap<>();
+    
     private final RestClient rest;
     private final long appId;
+    private final String publicKey, path, keystore, keystorePass;
+    private final int port, threads;
     private final List<Command> commands;
     private final InteractionsListener listener;
     
-    protected InteractionsClient(long appId, RestClient rest, List<Command> commands, InteractionsListener listener)
+    private Javalin javalin;
+    
+    protected InteractionsClient(long appId, String publicKey, String path, String keystore, String keystorePass, int port, int threads, RestClient rest, List<Command> commands, InteractionsListener listener)
     {
         this.appId = appId;
+        this.publicKey = publicKey;
+        this.path = path == null ? "/" : path;
+        this.keystore = keystore;
+        this.keystorePass = keystorePass;
+        this.port = port <= 0 ? 8443 : port;
+        this.threads = threads  <= 0 ? 250 : threads;
         this.rest = rest;
         this.commands = commands;
         this.listener = listener == null ? new InteractionsListener(){} : listener;
     }
     
-    public List<Command> getCommands()
+    public void start() throws InvalidKeyException, NoSuchAlgorithmException
     {
-        return commands;
+        if(javalin != null)
+            throw new IllegalStateException("Interactions Client has already started!");
+        EdDSAParameterSpec spec = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.ED_25519);
+        EdDSAPublicKeySpec pubKey = new EdDSAPublicKeySpec(Utils.hexToBytes(publicKey), spec);
+        EdDSAEngine sgr = new EdDSAEngine(MessageDigest.getInstance(spec.getHashAlgorithm()));
+        sgr.initVerify(new EdDSAPublicKey(pubKey));
+        
+        javalin = Javalin.create(conf -> 
+        {
+            // configure https
+            if(keystore != null && keystorePass != null)
+            {
+                conf.server(() -> 
+                {
+                    QueuedThreadPool pool = new QueuedThreadPool(threads, 8, 60_000);
+                    pool.setName("JettyServerThreadPool");
+                    Server server = new Server(pool);
+                    SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
+                    sslContextFactory.setKeyStorePath(keystore);
+                    sslContextFactory.setKeyStorePassword(keystorePass);
+                    ServerConnector sslConnector = new ServerConnector(server, sslContextFactory);
+                    sslConnector.setPort(port);
+                    server.setConnectors(new Connector[]{sslConnector});
+                    StatisticsHandler statsHandler = new StatisticsHandler();
+                    statsHandler.setGracefulShutdownWaitsForRequests(true);
+                    server.setHandler(statsHandler);
+                    server.setStopTimeout(5000);
+                    return server;
+                });
+            }
+        }).post(path, ctx ->
+        {
+            long startTime = System.nanoTime();
+            
+            // verify that discord is sending the request
+            sgr.update((ctx.header("x-signature-timestamp") + ctx.body()).getBytes(Charset.forName("UTF-8")));
+            boolean verified = false;
+            try
+            {
+                verified = sgr.verify(Utils.hexToBytes(ctx.header("x-signature-ed25519")));
+            }
+            catch (SignatureException | NullPointerException ex) {}
+            
+            long verifyTime = System.nanoTime();
+            long parseTime = System.nanoTime();
+            long processTime = System.nanoTime();
+            
+            if(verified)
+            {
+                log.debug(String.format("Received interaction: %s", ctx.body()));
+
+                // construct an interaction object
+                Interaction interaction = new Interaction(new JSONObject(ctx.body()), this);
+                parseTime = System.nanoTime();
+                String response = handle(interaction).toJson().toString();
+                processTime = System.nanoTime();
+
+                log.debug(String.format("Replying with: %s", response));
+                increaseMetricValue("Valid", 1);
+                increaseMetricValue("Type:" + interaction.getType().toString(), 1);
+                ctx.status(200).header("Content-Type", "Application/Json").result(response);
+            }
+            else
+            {
+                log.debug(String.format("Unverified request from %s (%s | %s)", ctx.host(), ctx.matchedPath(), ctx.header("x-signature-ed25519")));
+                increaseMetricValue("Unverified", 1);
+                ctx.status(401);
+            }
+            
+            long finishTime = System.nanoTime();
+            
+            increaseMetricValue("TotalRequests", 1);
+            increaseMetricValue("TotalTime", finishTime - startTime);
+            increaseMetricValue("ResponseTime", finishTime - processTime);
+            increaseMetricValue("ProcessTime", processTime - parseTime);
+            increaseMetricValue("ParseTime", parseTime - verifyTime);
+            increaseMetricValue("VerifyTime", verifyTime - startTime);
+        }).exception(Exception.class, (ex, ctx) -> 
+        {
+            if(ex instanceof EofException)
+                increaseMetricValue("EofException", 1);
+            else
+                log.error("Exception", ex);
+        }).start();
     }
     
-    public InteractionResponse handle(Interaction interaction)
+    public void shutdown()
+    {
+        try
+        {
+            javalin.stop();
+        }
+        catch(Exception ex)
+        {
+            log.warn("Javalin may not have shut down: ", ex);
+        }
+    }
+    
+    private InteractionResponse handle(Interaction interaction)
     {
         switch(interaction.getType())
         {
@@ -162,9 +288,24 @@ public class InteractionsClient
         }
     }
     
+    private synchronized long increaseMetricValue(String key, long count)
+    {
+        long val = metrics.getOrDefault(key, 0L);
+        val += count;
+        metrics.put(key, val);
+        return val;
+    }
+    
+    public Map<String,Long> getMetrics()
+    {
+        return Collections.unmodifiableMap(metrics);
+    }
+    
     public static class Builder
     {
         private final List<Command> commands = new ArrayList<>();
+        private String publicKey, path, keystore, keystorePass;
+        private int port, threads;
         private long appId;
         private RestClient rest;
         private InteractionsListener listener;
@@ -172,6 +313,42 @@ public class InteractionsClient
         public Builder setAppId(long appId)
         {
             this.appId = appId;
+            return this;
+        }
+        
+        public Builder setPublicKey(String publicKey)
+        {
+            this.publicKey = publicKey;
+            return this;
+        }
+        
+        public Builder setPath(String path)
+        {
+            this.path = path;
+            return this;
+        }
+        
+        public Builder setKeystore(String keystore)
+        {
+            this.keystore = keystore;
+            return this;
+        }
+        
+        public Builder setKeystorePass(String keystorePass)
+        {
+            this.keystorePass = keystorePass;
+            return this;
+        }
+        
+        public Builder setPort(int port)
+        {
+            this.port = port;
+            return this;
+        }
+        
+        public Builder setThreads(int threads)
+        {
+            this.threads = threads;
             return this;
         }
         
@@ -196,7 +373,7 @@ public class InteractionsClient
         
         public InteractionsClient build()
         {
-            return new InteractionsClient(appId, rest, commands, listener);
+            return new InteractionsClient(appId, publicKey, path, keystore, keystorePass, port, threads, rest, commands, listener);
         }
     }
 }
