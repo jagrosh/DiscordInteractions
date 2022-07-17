@@ -85,8 +85,12 @@ public class ApplicationCommandOption implements IJson
         }
         this.options = JsonUtil.optArray(json, "options", ApplicationCommandOption::new);
         this.channelTypes = JsonUtil.optIntArray(json, "channel_types", ChannelType::of);
-        this.minValue = type == ApplicationCommandOption.Type.INTEGER ? json.optInt("min_value") : json.optDouble("min_value");
-        this.maxValue = type == ApplicationCommandOption.Type.INTEGER ? json.optInt("max_value") : json.optDouble("max_value");
+        this.minValue = type == ApplicationCommandOption.Type.INTEGER ? json.optInt("min_value") 
+                : type == ApplicationCommandOption.Type.STRING ? json.optInt("min_length")
+                : json.optDouble("min_value");
+        this.maxValue = type == ApplicationCommandOption.Type.INTEGER ? json.optInt("max_value") 
+                : type == ApplicationCommandOption.Type.STRING ? json.optInt("max_length") 
+                : json.optDouble("max_value");
         this.autocomplete = json.optBoolean("autocomplete", false);
     }
     
@@ -135,6 +139,10 @@ public class ApplicationCommandOption implements IJson
                 return obj
                         .putOpt("min_value", minValue)
                         .putOpt("max_value", maxValue);
+            case STRING:
+                return obj
+                        .putOpt("min_length", minValue == null ? null : (int)(double) minValue)
+                        .putOpt("max_length", maxValue == null ? null : (int)(double) maxValue);
             default:
                 return obj;
         }

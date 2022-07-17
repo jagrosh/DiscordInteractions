@@ -35,6 +35,7 @@ public enum Route
     DELETE_GUILD_COMMAND(Type.DELETE, "applications/%d/guilds/%d/commands/%d"),
     
     // send message
+    GET_MESSAGE(Type.GET, "channels/%d/messages/%d"),
     POST_MESSAGE(Type.POST, "channels/%d/messages"),
     PATCH_MESSAGE(Type.PATCH, "channels/%d/messages/%d"),
     DELETE_MESSAGE(Type.DELETE, "channels/%d/messages/%d"),
