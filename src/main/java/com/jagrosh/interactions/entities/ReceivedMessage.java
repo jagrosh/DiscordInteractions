@@ -52,7 +52,7 @@ public class ReceivedMessage extends Message implements ISnowflake
     
     public ReceivedMessage(JSONObject json)
     {
-        super(json.getString("content"), json.getBoolean("tts"));
+        super(json.optString("content"), json.optBoolean("tts"));
         this.id = json.getLong("id");
         this.channelId = json.getLong("channel_id");
         this.guildId = json.optLong("guild_id");
