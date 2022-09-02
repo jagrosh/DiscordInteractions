@@ -15,7 +15,6 @@
  */
 package com.jagrosh.interactions.requests;
 
-import com.jagrosh.interactions.requests.Route;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import okhttp3.*;
@@ -74,12 +73,22 @@ public class RestClient
     
     public CompletableFuture<RestResponse> simpleRequest(String url)
     {
+        return simpleRequest(url, Route.Type.GET);
+    }
+    
+    public CompletableFuture<RestResponse> simpleRequest(String url, Route.Type type)
+    {
+        return simpleRequest(url, Route.Type.GET, null);
+    }
+    
+    public CompletableFuture<RestResponse> simpleRequest(String url, Route.Type type, String body)
+    {
         return CompletableFuture.supplyAsync(() -> 
         {
             try
             {
                 Response res = client.newCall(new Request.Builder()
-                    .url(url).get()
+                    .url(url).method(type.name(), body == null || body.isEmpty() ? null : RequestBody.create(body.getBytes()))
                     .header("Content-Type", "Application/Json")
                     .header("User-Agent", "DiscordBot (DiscordInteractions, 0.1)").build()).execute();
                 return new RestResponse(res.code(), bodyToJson(res.body()));

@@ -123,7 +123,7 @@ public class InteractionsClient
             {
                 verified = sgr.verify(Utils.hexToBytes(ctx.header("x-signature-ed25519")));
             }
-            catch (SignatureException | NullPointerException ex) {}
+            catch (SignatureException | NullPointerException | ArrayIndexOutOfBoundsException ex) {}
             
             long verifyTime = System.nanoTime();
             long parseTime = System.nanoTime();

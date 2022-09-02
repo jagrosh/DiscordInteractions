@@ -27,6 +27,7 @@ public enum Route
     POST_COMMANDS(Type.POST, "applications/%d/commands"),
     PATCH_COMMAND(Type.PATCH, "applications/%d/commands/%d"),
     DELETE_COMMAND(Type.DELETE, "applications/%d/commands/%d"),
+    GET_GATEWAY(Type.GET, "gateway/bot"),
     
      // guild
     GET_GUILD_COMMANDS(Type.GET, "applications/%d/guilds/%d/commands"),
