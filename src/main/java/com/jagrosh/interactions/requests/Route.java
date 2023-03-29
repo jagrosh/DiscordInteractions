@@ -41,6 +41,10 @@ public enum Route
     PATCH_MESSAGE(Type.PATCH, "channels/%d/messages/%d"),
     DELETE_MESSAGE(Type.DELETE, "channels/%d/messages/%d"),
     
+    // pin message
+    PIN_MESSAGE(TYPE.POST, "/channels/%d/pins/%d"), 
+    UNPIN_MESSAGE(TYPE.DELETE, "/channels/%d/pins/%d"),
+    
     // get guild
     GET_GUILD(Type.GET, "guilds/%d"),
     ADD_GUILD_MEMBER_ROLE(Type.PUT, "/guilds/%d/members/%d/roles/%d"),
