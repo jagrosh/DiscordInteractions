@@ -42,13 +42,13 @@ public enum Route
     DELETE_MESSAGE(Type.DELETE, "channels/%d/messages/%d"),
     
     // pin message
-    PIN_MESSAGE(TYPE.POST, "/channels/%d/pins/%d"), 
-    UNPIN_MESSAGE(TYPE.DELETE, "/channels/%d/pins/%d"),
+    PIN_MESSAGE(TYPE.POST, "channels/%d/pins/%d"), 
+    UNPIN_MESSAGE(TYPE.DELETE, "channels/%d/pins/%d"),
     
     // get guild
     GET_GUILD(Type.GET, "guilds/%d"),
-    ADD_GUILD_MEMBER_ROLE(Type.PUT, "/guilds/%d/members/%d/roles/%d"),
-    REMOVE_GUILD_MEMBER_ROLE(Type.DELETE, "/guilds/%d/members/%d/roles/%d"),
+    ADD_GUILD_MEMBER_ROLE(Type.PUT, "guilds/%d/members/%d/roles/%d"),
+    REMOVE_GUILD_MEMBER_ROLE(Type.DELETE, "guilds/%d/members/%d/roles/%d"),
     ;
     
     public static final String BASE_URL = "https://discordapp.com/api/v8/";
