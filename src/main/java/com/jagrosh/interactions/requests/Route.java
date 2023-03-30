@@ -29,6 +29,9 @@ public enum Route
     DELETE_COMMAND(Type.DELETE, "applications/%d/commands/%d"),
     GET_GATEWAY(Type.GET, "gateway/bot"),
     
+    //user
+    CREATE_DM(Type.POST, "users/@me/channels"),
+    
      // guild
     GET_GUILD_COMMANDS(Type.GET, "applications/%d/guilds/%d/commands"),
     POST_GUILD_COMMANDS(Type.POST, "applications/%d/guilds/%d/commands"),
